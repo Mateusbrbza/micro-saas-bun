@@ -2,14 +2,19 @@
   "name": "micro-saas-bun",
   "module": "index.ts",
   "type": "module",
+  "scripts": {
+    "dev": "bun --watch src/index.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/express": "^4.17.21"
+    "@types/express": "^4.17.21",
+    "prisma": "^5.19.1"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@prisma/client": "5.19.1",
     "express": "^4.19.2"
   }
 }
