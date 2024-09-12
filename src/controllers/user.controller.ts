@@ -1,4 +1,4 @@
-import { response, type Request, type Response } from "express";
+import { type Request, type Response } from "express";
 import { prisma } from "../lib/prisma";
 
 export const listUsersController = async (req: Request, res: Response) => {
@@ -57,3 +57,73 @@ export const createuserController = async (req: Request, res: Response) => {
 
   res.send(user);
 }
+
+export const updateUserController = async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  const { name, email } = req.body;
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+
+  if (!user) {
+    return res.status(404).send({
+      error: 'Not found',
+    });
+  }
+
+  if (email && email !== user.email) {
+    const userEmailAlreadyExists = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (userEmailAlreadyExists) {
+      return res.status(400).send({
+        error: 'Email already in use',
+      });
+    }
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      name: name ?? user.name,
+      email: email ?? user.email,
+    },
+  });
+
+  res.send(updatedUser);
+};
+
+export const deleteUserController = async (req: Request, res: Response) => {
+  const { userId } = req.params;
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+
+  if (!user) {
+    return res.status(404).send({
+      error: 'Not found',
+    });
+  }
+
+  await prisma.user.delete({
+    where: {
+      id: userId,
+    },
+  });
+
+  res.status(204).send();
+};

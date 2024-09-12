@@ -31,5 +31,5 @@ export const createTodoController = async (req: Request, res: Response) => {
     }
   })
 
-  return res.send(todo)
+  return res.status(201).send(todo)
 }
