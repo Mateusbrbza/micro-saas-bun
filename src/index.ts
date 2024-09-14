@@ -9,6 +9,7 @@ import {
   createTodoController,
   getTodosController,
 } from './controllers/todo.controller';
+import { createCheckoutController } from './controllers/checkout.controller';
 
 const app = express();
 const port = 3000;
@@ -23,6 +24,8 @@ app.put('/users/:userId', updateUserController)
 // todos
 app.get('/todos', getTodosController)
 app.post('/todos', createTodoController)
+// checkout
+app.post('/checkout', createCheckoutController)
 
 app.get('/', (req, res) => {
   res.send("Hello World!");
