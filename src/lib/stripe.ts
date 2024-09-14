@@ -28,5 +28,10 @@ export const generateCheckout = async (userId: string) => {
 }
 
 
-export const handleProcessWebhokCheckout = () => {}
-export const handleProcessWebhokSubscription = () => {}
+export const handleProcessWebhokCheckout = (
+  event: { data: { object: Stripe.Checkout.Session }}
+) => {}
+
+export const handleProcessWebhokSubscription = (
+  event: { data: { object: Stripe.Subscription }}
+) => {}
