@@ -1,7 +1,6 @@
 import express from 'express';
 import {
   createUserController,
-  deleteUserController,
   findOneUserController,
   listUsersController,
   updateUserController
@@ -21,8 +20,6 @@ app.get('/users', listUsersController)
 app.get('/users/:userId', findOneUserController)
 app.post('/users', createUserController)
 app.put('/users/:userId', updateUserController)
-app.delete('/users/:userId', deleteUserController)
-
 // todos
 app.get('/todos', getTodosController)
 app.post('/todos', createTodoController)
