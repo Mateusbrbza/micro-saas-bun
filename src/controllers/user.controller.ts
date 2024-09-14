@@ -24,12 +24,12 @@ export const findOneUserController = async (req: Request, res: Response) => {
   res.send(user)
 }
 
-export const createuserController = async (req: Request, res: Response) => {
+export const createUserController = async (req: Request, res: Response) => {
   const { name, email } = req.body
 
   if (!name || !email) {
-    return res.send({
-      error: "name or email is invalid"
+    return res.status(400).send({
+      error: "Name and email are required"
     })
   }
 
@@ -55,12 +55,18 @@ export const createuserController = async (req: Request, res: Response) => {
     }
   })
 
-  res.send(user);
+  res.status(201).send(user);
 }
 
 export const updateUserController = async (req: Request, res: Response) => {
   const { userId } = req.params;
   const { name, email } = req.body;
+
+  if (!name && !email) {
+    return res.status(400).send({
+      error: 'At least one field (name or email) must be provided for update',
+    });
+  }
 
   const user = await prisma.user.findUnique({
     where: {
@@ -70,7 +76,7 @@ export const updateUserController = async (req: Request, res: Response) => {
 
   if (!user) {
     return res.status(404).send({
-      error: 'Not found',
+      error: 'User not found',
     });
   }
 
@@ -96,8 +102,8 @@ export const updateUserController = async (req: Request, res: Response) => {
       id: userId,
     },
     data: {
-      name: name ?? user.name,
-      email: email ?? user.email,
+      name: name || undefined,
+      email: email || undefined,
     },
   });
 
@@ -115,7 +121,7 @@ export const deleteUserController = async (req: Request, res: Response) => {
 
   if (!user) {
     return res.status(404).send({
-      error: 'Not found',
+      error: 'User not found',
     });
   }
 

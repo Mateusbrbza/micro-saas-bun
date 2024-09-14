@@ -8,8 +8,8 @@ POST http://localhost:3000/users HTTP/1.1
 Content-Type: application/json
 
 {
-  "name": "joselito",
-  "email": "joselito@hotmail.com"
+  "name": "joselito_fernandes",
+  "email": "joselito_fernandes@hotmail.com"
 }
 ###
 
@@ -17,7 +17,7 @@ PUT http://localhost:3000/users/bce1020f-a19f-46d8-afcc-d4265b46d99f HTTP/1.1
 Content-Type: application/json
 
 {
-  "name": "joselito_updated",
+  "name": "joselito_updated2",
   "email": "joselito_updated@hotmail.com"
 }
 ###
@@ -32,3 +32,34 @@ x-user-id: bce1020f-a19f-46d8-afcc-d4265b46d99f
 {
   "title": "My second task"
 }
+###
+
+GET http://localhost:3000/todos HTTP/1.1
+x-user-id: bce1020f-a19f-46d8-afcc-d4265b46d99f
+###
+
+GET http://localhost:3000/todos/0e2c8da2-a718-4022-b408-36df223e46f5 HTTP/1.1
+x-user-id: bce1020f-a19f-46d8-afcc-d4265b46d99f
+###
+
+POST http://localhost:3000/todos HTTP/1.1
+Content-Type: application/json
+x-user-id: bce1020f-a19f-46d8-afcc-d4265b46d99f
+
+{
+  "title": "Quarta task"
+}
+###
+
+PUT http://localhost:3000/todos/c2354fd6-e1a6-4f0b-8396-91b9f65be087 HTTP/1.1
+Content-Type: application/json
+x-user-id: bce1020f-a19f-46d8-afcc-d4265b46d99f
+
+{
+  "title": "Meu update na quarta task"
+}
+###
+
+DELETE http://localhost:3000/todos/392b0379-428c-4b3f-8111-c3952877a836 HTTP/1.1
+x-user-id: bce1020f-a19f-46d8-afcc-d4265b46d99f
+###

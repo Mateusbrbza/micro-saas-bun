@@ -1,6 +1,20 @@
 import type { Request, Response } from "express";
 import { prisma } from "../lib/prisma";
 
+export const getTodosController = async (req: Request, res: Response) => {
+  const userId = req.headers['x-user-id'];
+
+  if (!userId) {
+    return res.status(403).send({ error: 'Not authorized' });
+  }
+
+  const todos = await prisma.todo.findMany({
+    where: { ownerId: userId as string },
+  });
+
+  return res.send(todos);
+};
+
 export const createTodoController = async (req: Request, res: Response) => {
   const { title } = req.body
   const userId = req.headers['x-user-id']
