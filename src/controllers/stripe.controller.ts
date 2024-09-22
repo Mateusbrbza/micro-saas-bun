@@ -1,12 +1,16 @@
 import type { Request, Response } from "express";
-import { handleProcessWebhokCheckout, handleProcessWebhokSubscription, stripe } from "../lib/stripe";
+import {
+  handleProcessWebhokCheckout,
+  handleProcessWebhokSubscription,
+  stripe
+ } from "../lib/stripe";
 import { config } from "../config";
 
 export const stripeWebhookController = async (req: Request, res: Response) => {
   let event = req.body
 
-  if (!config.stripe.secretKey) {
-    console.error('STRIPE_WEBHOOK_SECRET_KEY is not set')
+  if (!config.stripe.webhookSecret) {
+    console.error('STRIPE_WEBHOOK_SECRET is not set')
     return res.sendStatus(400)
   }
 
@@ -16,7 +20,7 @@ export const stripeWebhookController = async (req: Request, res: Response) => {
     event = stripe.webhooks.constructEvent(
       req.body,
       signature,
-      config.stripe.secretKey
+      config.stripe.webhookSecret
     )
   } catch (err) {
     const errorMessage = (err instanceof Error) ? err.message : 'Unknown error'

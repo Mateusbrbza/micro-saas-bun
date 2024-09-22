@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { config } from "../config";
+import { prisma } from "./prisma";
 
 export const stripe = new Stripe(config.stripe.secretKey as string, {
   apiVersion: '2024-06-20',
@@ -28,10 +29,72 @@ export const generateCheckout = async (userId: string) => {
 }
 
 
-export const handleProcessWebhokCheckout = (
-  event: { data: { object: Stripe.Checkout.Session }}
-) => {}
+export const handleProcessWebhokCheckout = async (
+  event: { object: Stripe.Checkout.Session }
+) => {
+  const clientReferenceId = event.object.client_reference_id as string;
+  const stripeSubscriptionId = event.object.subscription as string;
+  const stripeCustomerId = event.object.customer as string;
+  const checkoutStatus = event.object.status as string;
 
-export const handleProcessWebhokSubscription = (
-  event: { data: { object: Stripe.Subscription }}
-) => {}
+  if (checkoutStatus !== 'complete') return;
+
+  if (!clientReferenceId || !stripeCustomerId || !stripeSubscriptionId) {
+    throw new Error('clientReferenceId, stripeSubscriptionId and stripeCustomerId is required')
+  }
+
+  const userExists = await prisma.user.findUnique({
+    where: {
+      id: clientReferenceId,
+    },
+    select: {
+      id: true,
+    },
+  })
+
+  if (!userExists) {
+    throw new Error('clientReferenceId not found')
+  }
+
+  await prisma.user.update({
+    where: {
+      id: userExists.id,
+    },
+    data: {
+      stripeCustomerId,
+      stripeSubscriptionId
+    }
+  })
+}
+
+export const handleProcessWebhokSubscription = async (
+  event: { object: Stripe.Subscription }
+) => {
+  const stripeCustomerId = event.object.customer as string;
+  const stripeSubscriptionId = event.object.id as string;
+  const stripeSubscriptionStatus = event.object.status;
+
+  const userExists = await prisma.user.findFirst({
+    where: {
+      id: stripeCustomerId,
+    },
+    select: {
+      id: true,
+    },
+  })
+
+  if (!userExists) {
+    throw new Error('stripeCustomerId not found')
+  }
+
+  await prisma.user.update({
+    where: {
+      id: userExists.id,
+    },
+    data: {
+      stripeSubscriptionId,
+      stripeCustomerId,
+      stripeSubscriptionStatus,
+    }
+  })
+}
