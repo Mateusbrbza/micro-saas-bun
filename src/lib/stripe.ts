@@ -4,14 +4,44 @@ import { prisma } from "./prisma";
 
 export const stripe = new Stripe(config.stripe.secretKey as string, {
   apiVersion: '2024-06-20',
+  httpClient: Stripe.createFetchHttpClient(),
 })
 
-export const generateCheckout = async (userId: string) => {
+const getStripeCustomerByEmail = async (email: string) => {
+  const customers = await stripe.customers.list({ email });
+  return customers.data[0];
+}
+
+export const createStripeCustomer = async (
+  input: {
+    name?: string,
+    email: string,
+  }
+) => {
   try {
+    let customer = await getStripeCustomerByEmail(input.email);
+    if (customer) return customer;
+
+    return stripe.customers.create({
+      email: input.email,
+      name: input.name,
+    })
+  } catch (err: any) {
+    throw new Error('Error creating Stripe customer', err);
+  }
+}
+
+export const generateCheckout = async (userId: string, userEmail: string) => {
+  try {
+    let customer = await createStripeCustomer({
+      email: userEmail,
+    });
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'subscription',
       client_reference_id: userId,
+      customer: customer.id,
       success_url: `http://localhost:3000/success.html`,
       cancel_url: `http://localhost:3000/cancel.html`,
       line_items: [{
@@ -21,10 +51,11 @@ export const generateCheckout = async (userId: string) => {
     })
 
     return {
+      stripeCustomerId: customer.id,
       url: session.url,
     }
-  } catch (err) {
-    console.error(err)
+  } catch (err: any) {
+    throw new Error('Error creating checkout session', err);
   }
 }
 

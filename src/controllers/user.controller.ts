@@ -1,5 +1,6 @@
 import { type Request, type Response } from "express";
 import { prisma } from "../lib/prisma";
+import { createStripeCustomer } from "../lib/stripe";
 
 export const listUsersController = async (req: Request, res: Response) => {
   const users = await prisma.user.findMany()
@@ -48,10 +49,13 @@ export const createUserController = async (req: Request, res: Response) => {
     })
   }
 
+  const stripeCustomer = await createStripeCustomer(email);
+
   const user = await prisma.user.create({
     data: {
       name,
       email,
+      stripeCustomerId: stripeCustomer.id,
     }
   })
 
@@ -108,4 +112,28 @@ export const updateUserController = async (req: Request, res: Response) => {
   });
 
   res.send(updatedUser);
+};
+
+export const deleteUserController = async (req: Request, res: Response) => {
+  const { userId } = req.params;
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+
+  if (!user) {
+    return res.status(404).send({
+      error: 'User not found',
+    });
+  }
+
+  await prisma.user.delete({
+    where: {
+      id: userId,
+    },
+  });
+
+  res.status(204).send();
 };

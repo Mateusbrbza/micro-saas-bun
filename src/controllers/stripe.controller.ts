@@ -1,3 +1,4 @@
+import Stripe from "stripe";
 import type { Request, Response } from "express";
 import {
   handleProcessWebhokCheckout,
@@ -17,10 +18,12 @@ export const stripeWebhookController = async (req: Request, res: Response) => {
   const signature = req.headers['stripe-signature'] as string;
 
   try {
-    event = stripe.webhooks.constructEvent(
+    event = await stripe.webhooks.constructEventAsync(
       req.body,
       signature,
-      config.stripe.webhookSecret
+      config.stripe.webhookSecret,
+      undefined,
+      Stripe.createSubtleCryptoProvider()
     )
   } catch (err) {
     const errorMessage = (err instanceof Error) ? err.message : 'Unknown error'
